@@ -123,6 +123,7 @@ func (j realJIRAClient) ListIssues(ids []int) ([]jira.Issue, error) {
 	var jql string
 	// If the list of IDs is too long, we get a 414 Request-URI Too Large, so in that case,
 	// we'll need to do the filtering ourselves.
+	log.Infof("Requesting %d JIRA issues", len(ids))
 	if len(ids) < maxJQLIssueLength {
 		jql = fmt.Sprintf("project='%s' AND cf[%s] in (%s)",
 			j.config.GetProjectKey(), j.config.GetFieldID(cfg.GitHubID), strings.Join(idStrs, ","))
@@ -131,7 +132,9 @@ func (j realJIRAClient) ListIssues(ids []int) ([]jira.Issue, error) {
 	}
 
 	ji, res, err := j.request(func() (interface{}, *jira.Response, error) {
-		return j.client.Issue.Search(jql, nil)
+		return j.client.Issue.Search(jql, &jira.SearchOptions{
+			MaxResults: maxJQLIssueLength,
+		})
 	})
 	if err != nil {
 		log.Errorf("Error retrieving JIRA issues: %v", err)
