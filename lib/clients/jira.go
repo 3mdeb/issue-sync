@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"math"
 	"net/http"
 	"regexp"
 	"strings"
@@ -115,22 +116,32 @@ type realJIRAClient struct {
 func (j realJIRAClient) ListIssues(ids []int) ([]jira.Issue, error) {
 	log := j.config.GetLogger()
 
-	idStrs := make([]string, len(ids))
+	idStrs := make([][]string, int(math.Ceil(float64(len(ids))/maxJQLIssueLength)))
 	for i, v := range ids {
-		idStrs[i] = fmt.Sprint(v)
+		if i%maxJQLIssueLength == 0 {
+			idStrs[i/maxJQLIssueLength] = []string{}
+		}
+		idStrs[i/maxJQLIssueLength] = append(idStrs[i/maxJQLIssueLength], fmt.Sprint(v))
 	}
 
-	var jql string
 	// If the list of IDs is too long, we get a 414 Request-URI Too Large, so in that case,
 	// we'll need to do the filtering ourselves.
 	log.Infof("Requesting %d JIRA issues", len(ids))
-	if len(ids) < maxJQLIssueLength {
-		jql = fmt.Sprintf("project='%s' AND cf[%s] in (%s)",
-			j.config.GetProjectKey(), j.config.GetFieldID(cfg.GitHubID), strings.Join(idStrs, ","))
-	} else {
-		jql = fmt.Sprintf("project='%s'", j.config.GetProjectKey())
+	jiraIssues := []jira.Issue{}
+	for i, idlist := range idStrs {
+		log.Debugf("Requesting index %d with %d ids", i, len(idlist))
+		issues, err := j.listIssues(idlist)
+		if err != nil {
+			return nil, err
+		}
+		jiraIssues = append(jiraIssues, issues...)
 	}
-
+	return jiraIssues, nil
+}
+func (j realJIRAClient) listIssues(ids []string) ([]jira.Issue, error) {
+	log := j.config.GetLogger()
+	jql := fmt.Sprintf("project='%s' AND cf[%s] in (%s)",
+		j.config.GetProjectKey(), j.config.GetFieldID(cfg.GitHubID), strings.Join(ids, ","))
 	ji, res, err := j.request(func() (interface{}, *jira.Response, error) {
 		return j.client.Issue.Search(jql, &jira.SearchOptions{
 			MaxResults: maxJQLIssueLength,
@@ -145,26 +156,7 @@ func (j realJIRAClient) ListIssues(ids []int) ([]jira.Issue, error) {
 		log.Errorf("Get JIRA issues did not return issues! Got: %v", ji)
 		return nil, fmt.Errorf("get JIRA issues failed: expected []jira.Issue; got %T", ji)
 	}
-
-	var issues []jira.Issue
-	if len(ids) < maxJQLIssueLength {
-		// The issues were already filtered by our JQL, so use as is
-		issues = jiraIssues
-	} else {
-		// Filter only issues which have a defined GitHub ID in the list of IDs
-		for _, v := range jiraIssues {
-			if id, err := v.Fields.Unknowns.Int(j.config.GetFieldKey(cfg.GitHubID)); err == nil {
-				for _, idOpt := range ids {
-					if id == int64(idOpt) {
-						issues = append(issues, v)
-						break
-					}
-				}
-			}
-		}
-	}
-
-	return issues, nil
+	return jiraIssues, nil
 }
 
 // GetIssue returns a single JIRA issue within the configured project
