@@ -2,7 +2,7 @@ export GO15VENDOREXPERIMENT=1
 export CGO_ENABLED:=0
 
 PROJ=issue-sync
-ORG_PATH=github.com/coreos
+ORG_PATH=github.com/indeedeng
 REPO_PATH=$(ORG_PATH)/$(PROJ)
 VERSION=$(shell ./git-version)
 BUILD_TIME=`date +%FT%T%z`
