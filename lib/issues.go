@@ -1,10 +1,11 @@
 package lib
 
 import (
+	"strconv"
 	"strings"
 	"time"
 
-	"github.com/andygrunwald/go-jira"
+	"github.com/3mdeb/go-jira"
 	"github.com/coreos/issue-sync/cfg"
 	"github.com/coreos/issue-sync/lib/clients"
 	"github.com/google/go-github/github"
@@ -212,7 +213,22 @@ func CreateIssue(config cfg.Config, issue github.Issue, ghClient clients.GitHubC
 
 	log.Debugf("Created JIRA issue %s!", jIssue.Key)
 
+	ghOrg, ghRepo := config.GetRepo()
+	ghIssueURL := "https://www.github.com/" + ghOrg + "/" + ghRepo + "/issues/" + strconv.Itoa(issue.GetNumber())
+	ghIssueTitle := ghOrg + "/" + ghRepo + " #" + strconv.Itoa(issue.GetNumber())
+
+	jRemoteLinkObject := jira.RemoteLinkObject{
+		URL: ghIssueURL,
+		Title: ghIssueTitle,
 	}
+
+	jRemoteLink := jira.RemoteLink{
+		Object:  &jRemoteLinkObject,
+	}
+
+	log.Debugf("Adding weblink %s to JIRA issue issue %s!", ghIssueURL, jIssue.Key)
+
+	jRemoteLink, err = jClient.AddRemoteLink(jIssue.ID, jRemoteLink)
 
 	// Do not sync comments
 	// if err := CompareComments(config, issue, jIssue, ghClient, jClient); err != nil {

@@ -3,8 +3,8 @@ module github.com/coreos/issue-sync
 go 1.19
 
 require (
+	github.com/3mdeb/go-jira v1.10.1-0.20221003125436-74a2d1ed2927
 	github.com/Sirupsen/logrus v1.0.6
-	github.com/andygrunwald/go-jira v1.10.0
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/dghubble/oauth1 v0.7.1
 	github.com/fsnotify/fsnotify v1.5.4

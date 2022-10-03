@@ -4,7 +4,7 @@ import (
 	"regexp"
 	"strconv"
 
-	"github.com/andygrunwald/go-jira"
+	"github.com/3mdeb/go-jira"
 	"github.com/coreos/issue-sync/cfg"
 	"github.com/coreos/issue-sync/lib/clients"
 	"github.com/google/go-github/github"

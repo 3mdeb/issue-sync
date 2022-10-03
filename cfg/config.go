@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/andygrunwald/go-jira"
+	"github.com/3mdeb/go-jira"
 	"github.com/dghubble/oauth1"
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/cobra"
