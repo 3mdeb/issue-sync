@@ -158,9 +158,10 @@ func UpdateIssue(config cfg.Config, ghIssue github.Issue, jIssue jira.Issue, ghC
 		return err
 	}
 
-	if err := CompareComments(config, ghIssue, issue, ghClient, jClient); err != nil {
-		return err
-	}
+	// Do not sync comments
+	// if err := CompareComments(config, ghIssue, issue, ghClient, jClient); err != nil {
+	// 	return err
+	// }
 
 	return nil
 }
@@ -211,9 +212,12 @@ func CreateIssue(config cfg.Config, issue github.Issue, ghClient clients.GitHubC
 
 	log.Debugf("Created JIRA issue %s!", jIssue.Key)
 
-	if err := CompareComments(config, issue, jIssue, ghClient, jClient); err != nil {
-		return err
 	}
+
+	// Do not sync comments
+	// if err := CompareComments(config, issue, jIssue, ghClient, jClient); err != nil {
+	// 	return err
+	// }
 
 	return nil
 }
