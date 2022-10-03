@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/Sirupsen/logrus v1.0.6
-	github.com/andygrunwald/go-jira v1.16.0
+	github.com/andygrunwald/go-jira v1.10.0
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/dghubble/oauth1 v0.7.1
 	github.com/fsnotify/fsnotify v1.5.4
@@ -17,7 +17,6 @@ require (
 
 require (
 	github.com/fatih/structs v1.1.0 // indirect
-	github.com/golang-jwt/jwt/v4 v4.4.2 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
